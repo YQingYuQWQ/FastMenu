@@ -1,0 +1,15 @@
+name: FastMenu
+version: '1.0-YiQingYu'
+main: org.YQY.fastMenu.FastMenu
+api-version: '1.21'
+author: YQingYuQWQ
+description: FastMenu a simple plugin that allows you to open a menu with a command.
+commands:
+  fm:
+    description: reload the menu
+    aliases: [cd]
+    usage: /fm reload
+permissions:
+  fastmenu.reload:
+    description: Allows the player to reload the menu
+    default: op
