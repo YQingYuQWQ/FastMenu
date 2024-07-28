@@ -5,14 +5,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.io.File;
+import java.util.*;
 
 public class MenuManager {
     private FastMenu plugin;
@@ -21,8 +23,23 @@ public class MenuManager {
         this.plugin = plugin;
     }
 
-    public Inventory createMenu() {
+    public void createAllMenu(HashMap<String, Inventory> list, HashMap<String, FileConfiguration> configMap){
         FileConfiguration config = plugin.getConfig();
+        File folder = plugin.getDataFolder();
+        File menuFolder = new File(folder, "Menu");
+        File[] configFiles = menuFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+        if (configFiles != null){
+            for (File file : configFiles){
+                String configName = file.getName();
+                FileConfiguration configuration = YamlConfiguration.loadConfiguration(file);
+                AbstractMap.SimpleEntry<String, Inventory> TempInventory = createMenu(configuration);
+                list.put(TempInventory.getKey(), TempInventory.getValue());
+                configMap.put(TempInventory.getKey(), configuration);
+            }
+        }
+    }
+
+    public AbstractMap.SimpleEntry<String, Inventory> createMenu(FileConfiguration config) {
         int size = config.getInt("menu.size");
         String title = config.getString("menu.title");// 菜单标题
         title = ChatColor.translateAlternateColorCodes('&', title);
@@ -65,18 +82,30 @@ public class MenuManager {
         }
 
         plugin.getLogger().info("Menu created.");
-        return menu;
+        return new AbstractMap.SimpleEntry<String, Inventory>(config.getString("menu.id"), menu);
     }
 
-    public String getCommandByItemName(String itemName) {
-        FileConfiguration config = plugin.getConfig();
-        for (String key : config.getConfigurationSection("menu.items").getKeys(false)) {
-            String name = config.getString("menu.items." + key + ".name");
-            String command = config.getString("menu.items." + key + ".command");
+
+    public void DoCommandByItemName(Player currentPlayer, String itemName) {
+        String currentInventoryName = plugin.currentOpenedMenuName.get(currentPlayer);
+        FileConfiguration currentInventoryConfig = plugin.menuConfigs.get(currentInventoryName);
+        for (String key : currentInventoryConfig.getConfigurationSection("menu.items").getKeys(false)) {
+            String name = currentInventoryConfig.getString("menu.items." + key + ".name");
             if (name.equals(itemName)) {
-                return command;
+                String command = currentInventoryConfig.getString("menu.items." + key + ".command");
+                if (command != null) {
+                    currentPlayer.performCommand(command);
+                    return;
+                }
+                String jump = currentInventoryConfig.getString("menu.items." + key + ".jump");
+                if (jump != null) {
+                    currentPlayer.closeInventory();
+                    if (currentPlayer.openInventory(plugin.menuList.get(jump)) != null){
+                        plugin.currentOpenedMenuName.put(currentPlayer, jump);
+                    }
+                    return;
+                }
             }
         }
-        return null;
     }
 }

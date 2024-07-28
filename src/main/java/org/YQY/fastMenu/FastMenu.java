@@ -3,27 +3,44 @@ package org.YQY.fastMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
+import org.bukkit.plugin.Plugin;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.bukkit.Bukkit.getPluginManager;
 
 public final class FastMenu extends JavaPlugin {
-    private Inventory menu;
+    HashMap<String, Inventory> menuList = new HashMap<String, Inventory>();
+    HashMap<String, FileConfiguration> menuConfigs = new HashMap<>();
+    HashMap<Player, String> currentOpenedMenuName = new HashMap<>();
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
-        getLogger().info("FastMenu is starting up...");
+        getLogger().info("FastMenu is starting up..");
 
-        // Save the default config if it doesn't exist
         saveDefaultConfig();
+        // Create Default Config Folder.
+        File menuFolder = new File(getDataFolder(), "Menu");
+        if (!menuFolder.exists()) {
+            menuFolder.mkdirs();
+            saveResource("main_menu.yml", false);
+        }
 
-        // Create instances of MenuManager and MenuListener
         MenuManager menuManager = new MenuManager(this);
-        menu = menuManager.createMenu();
+        menuManager.createAllMenu(menuList, menuConfigs);
+
         MenuListener menuListener = new MenuListener(this, menuManager);
 
         // Register MenuListener
-        Bukkit.getPluginManager().registerEvents(menuListener, this);
+        getPluginManager().registerEvents(menuListener, this);
 
         getLogger().info("FastMenu has been enabled!");
     }
@@ -34,8 +51,8 @@ public final class FastMenu extends JavaPlugin {
         getLogger().info("FastMenu is shutting down...");
     }
 
-    public Inventory getMenu() {
-        return menu;
+    public Inventory getMenu(String id) {
+        return menuList.get(id);
     }
 
     @Override
@@ -44,7 +61,6 @@ public final class FastMenu extends JavaPlugin {
             if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
                 if (sender.hasPermission("fastmenu.reload")) {
                     reloadConfig();
-                    menu = new MenuManager(this).createMenu();
                     sender.sendMessage("FastMenu configuration reloaded.");
                     return true;
                 } else {

@@ -1,0 +1,26 @@
+menu:
+  title: "&2&l圈地命令"
+  id: "res_menu"
+  size: 9
+  items:
+    item0:
+      material: WOODEN_HOE
+      name: "创建圈地"
+      command: afk
+      lore: " "
+      amount: 1
+      slot: 0
+    Setting:
+      material: ANVIL
+      name: "圈地设置"
+      jump: "res_setting"
+      lore: " "
+      amount: 1
+      slot: 0
+    back:
+      material: RED_BED
+      name: "返回主菜单"
+      jump: "main_menu"
+      lore: "点击这个回到主菜单"
+      amount: 1
+      slot: 8

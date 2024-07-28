@@ -9,6 +9,13 @@ commands:
     description: reload the menu
     aliases: [cd]
     usage: /fm reload
+  open_menu:
+    description: open specified menu.
+    usage: /open_menu
+  back:
+    description: back to last menu
+    aliases: [menu_back]
+    usage: /menu_back
 permissions:
   fastmenu.reload:
     description: Allows the player to reload the menu
