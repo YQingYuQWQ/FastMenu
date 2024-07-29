@@ -5,17 +5,12 @@ api-version: '1.21'
 author: YQingYuQWQ
 description: FastMenu a simple plugin that allows you to open a menu with a command.
 commands:
+  cd:
+    description: open menu
+    usage: /cd
   fm:
-    description: reload the menu
-    aliases: [cd]
+    description: reload fast menu.
     usage: /fm reload
-  open_menu:
-    description: open specified menu.
-    usage: /open_menu
-  back:
-    description: back to last menu
-    aliases: [menu_back]
-    usage: /menu_back
 permissions:
   fastmenu.reload:
     description: Allows the player to reload the menu
