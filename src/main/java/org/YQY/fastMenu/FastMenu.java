@@ -9,7 +9,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.plugin.Plugin;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +24,17 @@ public final class FastMenu extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("FastMenu is starting up..");
+        OnInit();
+        getLogger().info("FastMenu has been enabled!");
+    }
 
+    @Override
+    public void onDisable() {
+        // Plugin shutdown logic
+        getLogger().info("FastMenu is shutting down...");
+    }
+
+    public void OnInit(){
         saveDefaultConfig();
         // Create Default Config Folder.
         File menuFolder = new File(getDataFolder(), "Menu");
@@ -41,14 +50,6 @@ public final class FastMenu extends JavaPlugin {
 
         // Register MenuListener
         getPluginManager().registerEvents(menuListener, this);
-
-        getLogger().info("FastMenu has been enabled!");
-    }
-
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
-        getLogger().info("FastMenu is shutting down...");
     }
 
     public Inventory getMenu(String id) {
@@ -61,6 +62,7 @@ public final class FastMenu extends JavaPlugin {
             if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
                 if (sender.hasPermission("fastmenu.reload")) {
                     reloadConfig();
+                    OnInit();
                     sender.sendMessage("FastMenu configuration reloaded.");
                     return true;
                 } else {
@@ -68,6 +70,13 @@ public final class FastMenu extends JavaPlugin {
                     return true;
                 }
             }
+        }
+        else if (command.getName().equals("cd")){
+            Player player = (Player) sender;
+            player.closeInventory();
+            player.openInventory(getMenu("main_menu"));  // 打开已经创建的菜单
+            currentOpenedMenuName.put(player, "main_menu");
+            return true;
         }
         return false;
     }

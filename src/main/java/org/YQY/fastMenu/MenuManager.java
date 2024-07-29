@@ -91,7 +91,11 @@ public class MenuManager {
         FileConfiguration currentInventoryConfig = plugin.menuConfigs.get(currentInventoryName);
         for (String key : currentInventoryConfig.getConfigurationSection("menu.items").getKeys(false)) {
             String name = currentInventoryConfig.getString("menu.items." + key + ".name");
-            if (name.equals(itemName)) {
+            String fixedName = null;
+            if (name != null){
+                fixedName = itemName.replace("§", "&");
+            }
+            if (name.equals(fixedName)) {
                 String command = currentInventoryConfig.getString("menu.items." + key + ".command");
                 if (command != null) {
                     currentPlayer.performCommand(command);
@@ -103,6 +107,12 @@ public class MenuManager {
                     if (currentPlayer.openInventory(plugin.menuList.get(jump)) != null){
                         plugin.currentOpenedMenuName.put(currentPlayer, jump);
                     }
+                    return;
+                }
+                String opCommand = currentInventoryConfig.getString("menu.items." + key + ".op-command");
+                if (opCommand != null) {
+                    String newCommand = opCommand.replace("%Player%", currentPlayer.getName());
+                    Bukkit.getScheduler().runTask(plugin, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), newCommand));
                     return;
                 }
             }
